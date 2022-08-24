@@ -22,11 +22,19 @@ connectToDb((err) => {
 //routes
 
 app.get("/castles", (req, res) => {
+
+  const page = req.query.p || 0
+  const castlesPerPage = 2
+
+
+
   let castles = [];
 
   db.collection("Castlenames")
     .find() //this gets a cursor - use methods to view. toArray and ForEach.
     .sort({ castle: 1 })
+    .skip(page * castlesPerPage)
+    .limit(castlesPerPage)
     .forEach((castle) => castles.push(castle))
     .then(() => {
       res.status(200).json(castles);
