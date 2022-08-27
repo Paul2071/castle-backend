@@ -1,11 +1,12 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const { connectToDb, getDb } = require("./db");
+const cors = require( "cors")
 
 //init app and middleware
 const app = express();
-app.use(express.json())
-
+app.use(express.json());
+app.use(cors());
 
 //db connection
 let db;
@@ -21,17 +22,33 @@ connectToDb((err) => {
 
 //routes
 
-app.get("/castles", (req, res) => {
+app.get("/castles/all", (req, res) => {
+ 
+  let castles = [];
 
-  const page = req.query.p || 0
-  const castlesPerPage = 2
+  db.collection("castles")
+    .find() 
+    .sort({ castle: 1 })
+    .forEach((castle) => castles.push(castle))
+    .then(() => {
+      res.status(200).json(castles);
+    })
+    .catch(() => {
+      res.status(500).json({ error: "could not fetch" });
+    });
+});
 
 
+
+app.get("/castles/p/", (req, res) => {
+  const page = req.query.p || 0;
+  const castlesPerPage = 2;
 
   let castles = [];
 
-  db.collection("Castlenames")
-    .find() //this gets a cursor - use methods to view. toArray and ForEach.
+  db.collection("castles")
+    
+    .find() 
     .sort({ castle: 1 })
     .skip(page * castlesPerPage)
     .limit(castlesPerPage)
@@ -44,9 +61,10 @@ app.get("/castles", (req, res) => {
     });
 });
 
+
 app.get("/castles/:id", (req, res) => {
   if (ObjectId.isValid(req.params.id)) {
-    db.collection("Castlenames")
+    db.collection("castles")
       .findOne({ _id: ObjectId(req.params.id) })
       .then((doc) => {
         res.status(200).json(doc);
@@ -55,29 +73,27 @@ app.get("/castles/:id", (req, res) => {
         res.status(500).json({ error: "could not fetch" });
       });
   } else {
-    res.status(500).json({error: "ID not valid"})
+    res.status(500).json({ error: "ID not valid" });
   }
 });
 
 
-app.post('/castles', (req, res) => {
-    const sentData = req.body
+app.post("/castles", (req, res) => {
+  const sentData = req.body;
 
-  db.collection("Castlenames")
+  db.collection("castles")
     .insertOne(sentData)
-    .then(result => {
-      res.status(201).json(result)
+    .then((result) => {
+      res.status(201).json(result);
     })
-    .catch(err => {
-      res.status(500).json({error: "could not create"})
-    })
+    .catch((err) => {
+      res.status(500).json({ error: "could not create" });
+    });
+});
 
-})
-
-
-app.delete('/castles/:id', (req, res) => {
+app.delete("/castles/:id", (req, res) => {
   if (ObjectId.isValid(req.params.id)) {
-    db.collection("Castlenames")
+    db.collection("castles")
       .deleteOne({ _id: ObjectId(req.params.id) })
       .then((result) => {
         res.status(200).json(result);
@@ -86,15 +102,15 @@ app.delete('/castles/:id', (req, res) => {
         res.status(500).json({ error: "could not delete" });
       });
   } else {
-    res.status(500).json({error: "ID not valid"})
+    res.status(500).json({ error: "ID not valid" });
   }
-})
+});
 
-app.patch('/castles/:id', (req, res) => {
-  const updateData = req.body
+app.patch("/castles/:id", (req, res) => {
+  const updateData = req.body;
   if (ObjectId.isValid(req.params.id)) {
-    db.collection("Castlenames")
-      .updateOne({ _id: ObjectId(req.params.id) }, {$set: updateData})
+    db.collection("castles")
+      .updateOne({ _id: ObjectId(req.params.id) }, { $set: updateData })
       .then((result) => {
         res.status(200).json(result);
       })
@@ -102,7 +118,7 @@ app.patch('/castles/:id', (req, res) => {
         res.status(500).json({ error: "could not delete" });
       });
   } else {
-    res.status(500).json({error: "ID not valid"})
+    res.status(500).json({ error: "ID not valid" });
   }
+});
 
-})
