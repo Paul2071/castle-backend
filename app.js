@@ -41,7 +41,7 @@ app.get("/castles/all", (req, res) => {
 
 
 app.get("/castles/p/", (req, res) => {
-  const page = req.query.p || 0;
+  const page = req.query.pg || 0;
   const castlesPerPage = 2;
 
   let castles = [];
