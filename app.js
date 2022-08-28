@@ -1,7 +1,7 @@
 const express = require("express");
 const { ObjectId } = require("mongodb");
 const { connectToDb, getDb } = require("./db");
-const cors = require( "cors")
+const cors = require("cors");
 
 //init app and middleware
 const app = express();
@@ -22,14 +22,20 @@ connectToDb((err) => {
 
 //routes
 
-app.get("/castles/all", (req, res) => {
- 
+//get all castles plan to visit with pagination
+
+app.get("/castles/plan/all/p", (req, res) => {
+  const page = req.query.pg || 0;
+  const castlesPerPage = 6;
+
   let castles = [];
 
   db.collection("castles")
-    .find() 
+    .find({ addtovisit: "yes" })
     .sort({ castle: 1 })
-    .forEach((castle) => castles.push(castle))
+    .skip(page * castlesPerPage)
+    .limit(castlesPerPage)
+    .forEach((element) => castles.push(element))
     .then(() => {
       res.status(200).json(castles);
     })
@@ -38,17 +44,17 @@ app.get("/castles/all", (req, res) => {
     });
 });
 
+//get all castles visited with pagination
 
-
-app.get("/castles/p/", (req, res) => {
+app.get("/castles/visit/all/p", (req, res) => {
   const page = req.query.pg || 0;
-  const castlesPerPage = 2;
+  const castlesPerPage = 6;
 
   let castles = [];
 
   db.collection("castles")
-    
-    .find() 
+
+    .find({ visited: "yes" })
     .sort({ castle: 1 })
     .skip(page * castlesPerPage)
     .limit(castlesPerPage)
@@ -61,6 +67,47 @@ app.get("/castles/p/", (req, res) => {
     });
 });
 
+//get all castles
+
+// app.get("/castles/all", (req, res) => {
+//   let castles = [];
+
+//   db.collection("castles")
+//     .find()
+//     .sort({ castle: 1 })
+//     .forEach((element) => castles.push(element))
+//     .then(() => {
+//       res.status(200).json(castles);
+//     })
+//     .catch(() => {
+//       res.status(500).json({ error: "could not fetch" });
+//     });
+// });
+
+//get all castles and paginate
+
+app.get("/castles/p/", (req, res) => {
+  const page = req.query.pg || 0;
+  const castlesPerPage = 6;
+
+  let castles = [];
+
+  db.collection("castles")
+
+    .find()
+    .sort({ castle: 1 })
+    .skip(page * castlesPerPage)
+    .limit(castlesPerPage)
+    .forEach((castle) => castles.push(castle))
+    .then(() => {
+      res.status(200).json(castles);
+    })
+    .catch(() => {
+      res.status(500).json({ error: "could not fetch" });
+    });
+});
+
+//get a single document (castle) by id
 
 app.get("/castles/:id", (req, res) => {
   if (ObjectId.isValid(req.params.id)) {
@@ -77,6 +124,7 @@ app.get("/castles/:id", (req, res) => {
   }
 });
 
+//post requests
 
 app.post("/castles", (req, res) => {
   const sentData = req.body;
@@ -90,6 +138,8 @@ app.post("/castles", (req, res) => {
       res.status(500).json({ error: "could not create" });
     });
 });
+
+//delete request
 
 app.delete("/castles/:id", (req, res) => {
   if (ObjectId.isValid(req.params.id)) {
@@ -106,6 +156,8 @@ app.delete("/castles/:id", (req, res) => {
   }
 });
 
+//patch request
+
 app.patch("/castles/:id", (req, res) => {
   const updateData = req.body;
   if (ObjectId.isValid(req.params.id)) {
@@ -115,10 +167,9 @@ app.patch("/castles/:id", (req, res) => {
         res.status(200).json(result);
       })
       .catch((err) => {
-        res.status(500).json({ error: "could not delete" });
+        res.status(500).json({ error: "could not update" });
       });
   } else {
     res.status(500).json({ error: "ID not valid" });
   }
 });
-
