@@ -2,6 +2,8 @@ const express = require("express");
 const { ObjectId } = require("mongodb");
 const { connectToDb, getDb } = require("./db");
 const cors = require("cors");
+require('dotenv').config()
+
 
 //init app and middleware
 const app = express();
@@ -13,8 +15,8 @@ let db;
 
 connectToDb((err) => {
   if (!err) {
-    app.listen(3000, () => {
-      console.log("listening on port 3000");
+    app.listen(process.env.PORT, () => {
+      console.log("listening on port 5432");
     });
     db = getDb();
   }
