@@ -15,8 +15,8 @@ let db;
 
 connectToDb((err) => {
   if (!err) {
-    app.listen(process.env.PORT, () => {
-      console.log("listening on port 5432");
+    app.listen(3000, () => {
+      console.log("listening on port 3000");
     });
     db = getDb();
   }

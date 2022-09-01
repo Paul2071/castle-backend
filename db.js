@@ -8,7 +8,7 @@ let localURI = "mongodb://0.0.0.0:27017/Castles"
 
     module.exports = {
         connectToDb: (cb) => {
-            MongoClient.connect(process.env.MONGODBSTRING)
+            MongoClient.connect(connectURI)
             .then((client) => {
               dbConnection =  client.db()
               return cb()
