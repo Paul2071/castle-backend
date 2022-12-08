@@ -71,20 +71,20 @@ app.get("/castles/visit/all/p", (req, res) => {
 
 //get all castles
 
-// app.get("/castles/all", (req, res) => {
-//   let castles = [];
+app.get("/castles/all", (req, res) => {
+  let castles = [];
 
-//   db.collection("castles")
-//     .find()
-//     .sort({ castle: 1 })
-//     .forEach((element) => castles.push(element))
-//     .then(() => {
-//       res.status(200).json(castles);
-//     })
-//     .catch(() => {
-//       res.status(500).json({ error: "could not fetch" });
-//     });
-// });
+  db.collection("castles")
+    .find()
+    .sort({ castle: 1 })
+    .forEach((element) => castles.push(element))
+    .then(() => {
+      res.status(200).json(castles);
+    })
+    .catch(() => {
+      res.status(500).json({ error: "could not fetch" });
+    });
+});
 
 //get all castles and paginate
 
